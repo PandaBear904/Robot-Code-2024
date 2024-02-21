@@ -24,11 +24,13 @@ public class Robot extends TimedRobot {
 
   // Sets up autonomous routines.
   private static final String kDefaultAuto = "Default";
+  private static final String kDrive = "Drive";
   private static final String kScoreDrive = "ScoreDrive";
+  private static final String kScore = "Score";
+  private static final String kScoreDriveScore = "ScoreDriveScore";
   private static final String kNothing = "Nothing";
   private String m_autoSelected;
 
-  private String m_autoString;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   //Autonomous Length in Seconds
@@ -50,14 +52,6 @@ public class Robot extends TimedRobot {
   // The Drive Trian
   private final DifferentialDrive driveTrain = new DifferentialDrive(frontLeftMotor, frontRightMotor);
 
-  // Drive Motor Encoders
-  private final RelativeEncoder frontLeftMotorEncoder = frontLeftMotor.getEncoder(); // Front Left Motor Controller
-  private final RelativeEncoder backLeftMotorEncoder = backLeftMotor.getEncoder(); // Back Left Motor Controller
-  private final RelativeEncoder frontRightMotorEncoder = frontLeftMotor.getEncoder(); // Front Right Motor Controller
-  private final RelativeEncoder backRightMotorEncoder = frontLeftMotor.getEncoder(); // Back Right Motor Controller
-  
-
-
 
   // Intake Motor
   private final CANSparkMax intakeMotor = new CANSparkMax(5,MotorType.kBrushed);
@@ -70,6 +64,14 @@ public class Robot extends TimedRobot {
   //Climb motor
   private final CANSparkMax climbMotor1 = new CANSparkMax(10, MotorType.kBrushed);
   private final CANSparkMax climbMotor2 = new CANSparkMax(11, MotorType.kBrushed);
+
+  // Drive Motor Encoders
+  private final RelativeEncoder frontLeftMotorEncoder = frontLeftMotor.getEncoder(); // Front Left Motor Controller
+  private final RelativeEncoder backLeftMotorEncoder = backLeftMotor.getEncoder(); // Back Left Motor Controller
+  private final RelativeEncoder frontRightMotorEncoder = frontLeftMotor.getEncoder(); // Front Right Motor Controller
+  private final RelativeEncoder backRightMotorEncoder = frontLeftMotor.getEncoder(); // Back Right Motor Controller
+  private final RelativeEncoder armMotorEncoder = armMotor.getEncoder(); // Arm Motor Encoder
+
   //Haft speed
   public boolean halfSpeed = false;
 
@@ -113,13 +115,18 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Back Right Motor Encoder Distance (rotation*2.23)", backRightMotorEncoder.getPosition() * distancePerRotation);
     SmartDashboard.putNumber("Back Left Motor Encoder Position", backLeftMotorEncoder.getPosition());
     SmartDashboard.putNumber("Back Left Motor Encoder Distance (rotation*2.23)", backLeftMotorEncoder.getPosition() * distancePerRotation);
+    SmartDashboard.putNumber("Arm Motor Encoder", armMotorEncoder.getPosition());
   }
 
   @Override
   public void robotInit() {
   // Set up the options you see for auto on SmartDashboard. Need to add more when we are done with auto code.
   // Note if there is nothing here code will not work
-  m_chooser.setDefaultOption(m_autoString, kNothing);
+  m_chooser.setDefaultOption("Default - Score_Drive", kScoreDrive);
+  m_chooser.addOption("Score", kScore);
+  m_chooser.addOption("Score_Drive_Score", kScoreDriveScore);
+  m_chooser.addOption("Move", kDrive);
+  m_chooser.addOption("Do_Nothing", kNothing);
 
   SmartDashboard.putData("Auto choices", m_chooser);
 
@@ -179,7 +186,7 @@ public class Robot extends TimedRobot {
     bottomWheels = false;
     intakeAndFeed = false;
   } else if (redController.getRawButton(5)){ // L1 button 
-
+    
   } else if (redController.getRawButton(6)){ //R1 button turns on shooter
     topWheels = true;
     bottomWheels = true;
@@ -188,7 +195,6 @@ public class Robot extends TimedRobot {
   if (redController.getRawAxis(3) <= 1){
     feedWheels = true;
   }
-  // Need to add R2 to shot the game piece out
   // Add a reverse button
 
 
@@ -246,16 +252,20 @@ public class Robot extends TimedRobot {
     intakeMotor.setIdleMode(IdleMode.kCoast);
 
     //Sets motors Idle Mode to break
-    bottomShooter.setIdleMode(IdleMode.kBrake);
+    topShooter.setIdleMode(IdleMode.kCoast);
+    bottomShooter.setIdleMode(IdleMode.kCoast);
+    armMotor.setIdleMode(IdleMode.kBrake);
     climbMotor1.setIdleMode(IdleMode.kBrake);
+    climbMotor2.setIdleMode(IdleMode.kBrake);
   }
 
 
 
    public void score(){
     topWheels = true;
-    Timer.delay(1);
     bottomWheels = true;
+    Timer.delay(1);
+    feedWheels = true;
     Timer.delay(0.75);
     topWheels = false; 
     bottomWheels = false;
@@ -274,14 +284,36 @@ public class Robot extends TimedRobot {
     }
   }
 
+
+  public void Score(){
+    score();
+  }
+  public void Score_Drive_Score(){
+    score();
+    Timer.delay(0.25);
+    driveDistance(distanceOutStartArea);
+    intakeAndFeed = true;
+    Timer.delay(0.25);
+    driveDistance(-distanceOutStartArea);
+    score();
+  }
+
+  public void Drive(){
+    driveDistance(distanceOutStartArea);
+  }
+  
+  public void ScoreDrive(){
+    score();
+    Timer.delay(0.25);
+    driveDistance(distanceOutStartArea);
+  }
+
   public void nothing(){
     Timer.delay(autonomousLengthSecends - Timer.getMatchTime());
   }
+ 
 
-  public void ScoreDrive(){
-    score();
-    driveDistance(distanceOutStartArea);
-  }
+
 
 
   @Override
