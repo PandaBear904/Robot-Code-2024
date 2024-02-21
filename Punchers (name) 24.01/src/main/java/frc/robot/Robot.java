@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 
 
@@ -55,7 +56,7 @@ public class Robot extends TimedRobot {
 
   // Intake Motor
   private final CANSparkMax intakeMotor = new CANSparkMax(5,MotorType.kBrushed);
-  private final CANSparkMax armMotor = new CANSparkMax(6, MotorType.kBrushless);
+  private final CANSparkMax armMotor = new CANSparkMax(6, MotorType.kBrushed);
   // Shooter Motors
   // Shooters
   private final CANSparkMax topShooter = new CANSparkMax(7, MotorType.kBrushless);
@@ -72,15 +73,18 @@ public class Robot extends TimedRobot {
   private final RelativeEncoder backRightMotorEncoder = frontLeftMotor.getEncoder(); // Back Right Motor Controller
   private final RelativeEncoder armMotorEncoder = armMotor.getEncoder(); // Arm Motor Encoder
 
-  //Haft speed
+  // Half speed
   public boolean halfSpeed = false;
 
- 
-  //Auto Stuff
-  //Distants robot need to move in auto
-  public final double distanceOutStartArea = 200; // Need to test!!!!!!!!!!!
+  // Limit Switches
+  DigitalInput AmpLimit = new DigitalInput(0); // Amp 
+  DigitalInput SubWooferLimit = new DigitalInput(1); // subwoofer
+  DigitalInput PodiumLimit = new DigitalInput(2); // Podium
+  DigitalInput BackPostLimit = new DigitalInput(3); // BackPost
 
-  public final double distancePerRotation = 2.23;
+
+  public Integer armDesired;
+  public Integer armCurrent;
   
 
   //Speeds  have all various speeds here
@@ -91,14 +95,20 @@ public class Robot extends TimedRobot {
   public final double shooterAndFeedMotors = 1;
   public final double intakeSpeed = 1;
   public final double feedSpeed = 1;
+  public final double armSpeed = 1;
 
   public boolean topWheels = false;
   public boolean bottomWheels = false;
   public boolean feedWheels = false;
   public boolean climbMotors = false;
   public boolean intakeAndFeed = false;
+  public boolean override = false;
 
+  //Auto Stuff
+  //Distants robot need to move in auto
+  public final double distanceOutStartArea = 200; // Need to test!!!!!!!!!!!
 
+  public final double distancePerRotation = 2.23;
 
   public Robot(){
 
@@ -152,6 +162,9 @@ public class Robot extends TimedRobot {
   backRightMotor.follow(frontRightMotor);
   climbMotor2.follow(climbMotor1);
 
+  // Shooter Arm state
+  armDesired = 1;
+  armCurrent = 1;
 
   // Sets up Cammera
   CameraServer.startAutomaticCapture();
@@ -174,6 +187,67 @@ public class Robot extends TimedRobot {
   } else {
     driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1), 3), Math.pow(-blueController.getRawAxis(4), 3));
   }
+
+  // Set the break mode for drive train
+  if (blueController.getRawAxis(2) > 0.1){
+    frontLeftMotor.setIdleMode(IdleMode.kBrake);
+    backLeftMotor.setIdleMode(IdleMode.kBrake);
+    frontRightMotor.setIdleMode(IdleMode.kBrake);
+    backRightMotor.setIdleMode(IdleMode.kBrake);
+  } else if (blueController.getRawAxis(3) > 0.1){
+    frontLeftMotor.setIdleMode(IdleMode.kCoast);
+    backLeftMotor.setIdleMode(IdleMode.kCoast);
+    frontRightMotor.setIdleMode(IdleMode.kCoast);
+    backRightMotor.setIdleMode(IdleMode.kCoast);
+  }
+
+  if (blueController.getRawButton(1)){ // x button BackLeg
+    armDesired = 3; 
+  } else if (blueController.getRawButton(2)){ // o button Podium
+    armDesired = 2;
+  } else if (blueController.getRawButton(3)){ // square button SubWoofer
+    armDesired = 1;
+  } else if (blueController.getRawButton(4)){ // triangle button  Amp
+    armDesired = 0;
+  } else if (blueController.getRawButton(9)){
+    override = true;
+  } else if (blueController.getRawButton(10)){
+    override = false;
+  }
+
+
+  // reading arm sensor
+  if (AmpLimit.get()){
+    armCurrent = 0;
+  }
+  if (SubWooferLimit.get()){
+    armCurrent = 1;
+  }
+  if (PodiumLimit.get()){
+    armCurrent = 2;
+  }
+  if (BackPostLimit.get()){
+    armCurrent = 3;
+  }
+
+
+  if (override == true){
+    // Sets the arm motor direction
+    armMotor.set(Math.pow(-blueController.getRawAxis(5), 3));
+  } else {
+    if (armCurrent - armDesired < 0){
+      armMotor.set(-armSpeed);
+    } else if (armCurrent - armDesired > 0){
+      armMotor.set(armSpeed);
+    } else if (armCurrent - armDesired == 0){
+      armMotor.set(0);
+    }
+
+  }
+
+
+
+
   //buttons on red controller
   if (redController.getRawButton(1)){ // x button 
     
@@ -181,7 +255,7 @@ public class Robot extends TimedRobot {
     
   } else if (redController.getRawButton(3)){ // sqaure button intake motor
     intakeAndFeed = true;
-  } else if (redController.getRawButton(4)){ // triande button OFF button
+  } else if (redController.getRawButton(4)){ // triangle button OFF button
     topWheels = false;
     bottomWheels = false;
     intakeAndFeed = false;
@@ -191,10 +265,10 @@ public class Robot extends TimedRobot {
     topWheels = true;
     bottomWheels = true;
   }
-  armMotor.set(Math.pow(-redController.getRawAxis(5), 3));
-  if (redController.getRawAxis(3) <= 1){
+    if (blueController.getRawAxis(3) <= 1){
     feedWheels = true;
   }
+
   // Add a reverse button
 
 
@@ -224,22 +298,9 @@ public class Robot extends TimedRobot {
     intakeMotor.set(0);
   }
 
+}
 
 
-
-  // Set the break mode for drive train
-  if (blueController.getRawAxis(2) > 0.1){
-    frontLeftMotor.setIdleMode(IdleMode.kBrake);
-    backLeftMotor.setIdleMode(IdleMode.kBrake);
-    frontRightMotor.setIdleMode(IdleMode.kBrake);
-    backRightMotor.setIdleMode(IdleMode.kBrake);
-  } else if (blueController.getRawAxis(3) > 0.1){
-    frontLeftMotor.setIdleMode(IdleMode.kCoast);
-    backLeftMotor.setIdleMode(IdleMode.kCoast);
-    frontRightMotor.setIdleMode(IdleMode.kCoast);
-    backRightMotor.setIdleMode(IdleMode.kCoast);
-  }
-  }
 
   /* This function is called once when teleop is enabled*/
   @Override
