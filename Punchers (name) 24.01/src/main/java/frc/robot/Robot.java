@@ -81,6 +81,7 @@ public class Robot extends TimedRobot {
   DigitalInput SubWooferLimit = new DigitalInput(1); // subwoofer
   DigitalInput PodiumLimit = new DigitalInput(2); // Podium
   DigitalInput BackPostLimit = new DigitalInput(3); // BackPost
+  DigitalInput NotSensor = new DigitalInput(4); // light sensor to see if we have game piece
 
 
   public Integer armDesired;
@@ -92,7 +93,6 @@ public class Robot extends TimedRobot {
   public final double bottomShooterSpeed = 1;
   public final double shooterSpeed = 1;
   public final double intakeAndFeedMotors = 1;
-  public final double shooterAndFeedMotors = 1;
   public final double intakeSpeed = 1;
   public final double feedSpeed = 1;
   public final double armSpeed = 1;
@@ -265,11 +265,12 @@ public class Robot extends TimedRobot {
     topWheels = true;
     bottomWheels = true;
   }
-    if (blueController.getRawAxis(3) <= 1){
+  if (blueController.getRawAxis(3) <= 1){
     feedWheels = true;
   }
-
-  // Add a reverse button
+  if (NotSensor.get()){
+    intakeAndFeed = false;
+  }
 
 
   //put boolean if statements here to turn on and off motors
