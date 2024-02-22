@@ -106,7 +106,8 @@ public class Robot extends TimedRobot {
 
   //Auto Stuff
   //Distants robot need to move in auto
-  public final double distanceOutStartArea = 200; // Need to test!!!!!!!!!!!
+  public final double distanceOutStartArea = 200; // Need to test!!!!!!!!!!! 
+  // we need to be about 72in
 
   public final double distancePerRotation = 2.23;
 
