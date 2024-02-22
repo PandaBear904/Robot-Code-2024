@@ -71,7 +71,7 @@ public class Robot extends TimedRobot {
   private final RelativeEncoder backLeftMotorEncoder = backLeftMotor.getEncoder(); // Back Left Motor Controller
   private final RelativeEncoder frontRightMotorEncoder = frontLeftMotor.getEncoder(); // Front Right Motor Controller
   private final RelativeEncoder backRightMotorEncoder = frontLeftMotor.getEncoder(); // Back Right Motor Controller
-  private final RelativeEncoder armMotorEncoder = armMotor.getEncoder(); // Arm Motor Encoder
+  // private final RelativeEncoder armMotorEncoder = armMotor.getEncoder(); // Arm Motor Encoder
 
   // Half speed
   public boolean halfSpeed = false;
@@ -81,7 +81,7 @@ public class Robot extends TimedRobot {
   DigitalInput SubWooferLimit = new DigitalInput(1); // subwoofer
   DigitalInput PodiumLimit = new DigitalInput(2); // Podium
   DigitalInput BackPostLimit = new DigitalInput(3); // BackPost
-  DigitalInput NotSensor = new DigitalInput(4); // light sensor to see if we have game piece
+  DigitalInput NoteSensor = new DigitalInput(4); // light sensor to see if we have game piece
 
 
   public Integer armDesired;
@@ -110,9 +110,9 @@ public class Robot extends TimedRobot {
 
   public final double distancePerRotation = 2.23;
 
-  public Robot(){
+  /* public Robot(){ // Do we need?
 
-  }
+  } */
 
 
   @Override
@@ -125,7 +125,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Back Right Motor Encoder Distance (rotation*2.23)", backRightMotorEncoder.getPosition() * distancePerRotation);
     SmartDashboard.putNumber("Back Left Motor Encoder Position", backLeftMotorEncoder.getPosition());
     SmartDashboard.putNumber("Back Left Motor Encoder Distance (rotation*2.23)", backLeftMotorEncoder.getPosition() * distancePerRotation);
-    SmartDashboard.putNumber("Arm Motor Encoder", armMotorEncoder.getPosition());
+    // SmartDashboard.putNumber("Arm Motor Encoder", armMotorEncoder.getPosition()); //Might need to add back in if we get encoder.
   }
 
   @Override
@@ -245,9 +245,6 @@ public class Robot extends TimedRobot {
 
   }
 
-
-
-
   //buttons on red controller
   if (redController.getRawButton(1)){ // x button 
     
@@ -268,7 +265,7 @@ public class Robot extends TimedRobot {
   if (blueController.getRawAxis(3) <= 1){
     feedWheels = true;
   }
-  if (NotSensor.get()){
+  if (NoteSensor.get()){
     intakeAndFeed = false;
   }
 
@@ -321,9 +318,7 @@ public class Robot extends TimedRobot {
     climbMotor2.setIdleMode(IdleMode.kBrake);
   }
 
-
-
-   public void score(){
+  public void score(){
     topWheels = true;
     bottomWheels = true;
     Timer.delay(1);
@@ -374,10 +369,6 @@ public class Robot extends TimedRobot {
     Timer.delay(autonomousLengthSecends - Timer.getMatchTime());
   }
  
-
-
-
-
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
@@ -385,7 +376,6 @@ public class Robot extends TimedRobot {
   switch (m_autoSelected) {
     case kDefaultAuto:
 
-  } 
+    } 
   }
 }
-
