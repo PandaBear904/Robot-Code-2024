@@ -349,7 +349,10 @@ public class Robot extends TimedRobot {
   public void Score_Drive_Score(){ // Add not sensor to this
     score();
     Timer.delay(0.25);
-    intakeAndFeed = true;
+    /*intakeAndFeed = true;
+    if (NoteSensor.get()){
+      intakeAndFeed = false;
+    }*/
     driveDistance(distanceOutStartArea);
     Timer.delay(0.25);
     driveDistance(-distanceOutStartArea);
