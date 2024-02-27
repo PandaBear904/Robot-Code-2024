@@ -130,6 +130,9 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Back Right Motor Encoder Distance (rotation*2.23)", backRightMotorEncoder.getPosition() * distancePerRotation);
     SmartDashboard.putNumber("Back Left Motor Encoder Position", backLeftMotorEncoder.getPosition());
     SmartDashboard.putNumber("Back Left Motor Encoder Distance (rotation*2.23)", backLeftMotorEncoder.getPosition() * distancePerRotation);
+    SmartDashboard.putNumber("Top Shooter Motor Encoder", topShooterEncoder.getPosition());
+    SmartDashboard.putNumber("Bottom Shooter Motor Encoder", bottomShooterEncoder.getPosition());
+    
     // SmartDashboard.putNumber("Arm Motor Encoder", armMotorEncoder.getPosition()); //Might need to add back in if we get encoder.
   }
 
@@ -178,7 +181,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     //Sets up the drive train, Left stick controls the forward and back. Right controls turning
-    //Want cubic function. currently linear, look up deadlands
+    //Test deadband
     //blue controller
     if (blueController.getRawButton(5)) { //L1 half speed
       halfSpeed = true;
@@ -218,7 +221,7 @@ public class Robot extends TimedRobot {
   } else if (blueController.getRawButton(10)){
     climb = true;
   }
-// 1 left 3 right
+
   if (climb == true){
     climbMotor1.set(-blueController.getRawAxis(1)/2);
     climbMotor2.set(-blueController.getRawAxis(3)/2);
