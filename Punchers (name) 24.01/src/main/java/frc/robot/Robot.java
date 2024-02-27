@@ -71,6 +71,8 @@ public class Robot extends TimedRobot {
   private final RelativeEncoder backLeftMotorEncoder = backLeftMotor.getEncoder(); // Back Left Motor Controller
   private final RelativeEncoder frontRightMotorEncoder = frontLeftMotor.getEncoder(); // Front Right Motor Controller
   private final RelativeEncoder backRightMotorEncoder = frontLeftMotor.getEncoder(); // Back Right Motor Controller
+  private final RelativeEncoder topShooterEncoder = topShooter.getEncoder();
+  private final RelativeEncoder bottomShooterEncoder = bottomShooter.getEncoder();
   // private final RelativeEncoder armMotorEncoder = armMotor.getEncoder(); // Arm Motor Encoder
 
   // Half speed
@@ -95,7 +97,7 @@ public class Robot extends TimedRobot {
   public final double intakeAndFeedMotors = 1;
   public final double intakeSpeed = 1;
   public final double feedSpeed = 1;
-  public final double armSpeed = 1;
+  public final double armSpeed = 0.25;
 
   public boolean topWheels = false;
   public boolean bottomWheels = false;
@@ -103,6 +105,8 @@ public class Robot extends TimedRobot {
   public boolean climbMotors = false;
   public boolean intakeAndFeed = false;
   public boolean override = false;
+  public boolean reverseIntakeandFeed = false;
+  public boolean climb = false;
 
   //Auto Stuff
   //Distants robot need to move in auto
@@ -161,7 +165,6 @@ public class Robot extends TimedRobot {
   // groups motor controlers
   backLeftMotor.follow(frontLeftMotor);
   backRightMotor.follow(frontRightMotor);
-  climbMotor2.follow(climbMotor1);
 
   // Shooter Arm state
   armDesired = 1;
@@ -203,19 +206,23 @@ public class Robot extends TimedRobot {
   }
 
   if (blueController.getRawButton(1)){ // x button BackLeg
-    armDesired = 3; 
-  } else if (blueController.getRawButton(2)){ // o button Podium
-    armDesired = 2;
-  } else if (blueController.getRawButton(3)){ // square button SubWoofer
-    armDesired = 1;
-  } else if (blueController.getRawButton(4)){ // triangle button  Amp
-    armDesired = 0;
-  } else if (blueController.getRawButton(9)){
-    override = true;
-  } else if (blueController.getRawButton(10)){
-    override = false;
-  }
 
+  } else if (blueController.getRawButton(2)){ // o button Podium
+  reverseIntakeandFeed = true;
+  } else if (blueController.getRawButton(3)){ // square button  intake motor
+    intakeAndFeed = true;
+  } else if (blueController.getRawButton(4)){ // triangle button  OFF button
+    intakeAndFeed = false;
+  } else if (blueController.getRawButton(9)){
+
+  } else if (blueController.getRawButton(10)){
+    climb = true;
+  }
+// 1 left 3 right
+  if (climb == true){
+    climbMotor1.set(-blueController.getRawAxis(1)/2);
+    climbMotor2.set(-blueController.getRawAxis(3)/2);
+  }
 
   // reading arm sensor
   if (AmpLimit.get()){
@@ -234,7 +241,7 @@ public class Robot extends TimedRobot {
 
   if (override == true){
     // Sets the arm motor direction
-    armMotor.set(Math.pow(-blueController.getRawAxis(5), 3));
+    armMotor.set(Math.pow(-redController.getRawAxis(5), 3));
   } else {
     if (armCurrent - armDesired < 0){
       armMotor.set(-armSpeed);
@@ -247,21 +254,28 @@ public class Robot extends TimedRobot {
   }
 
   //buttons on red controller
-  if (redController.getRawButton(1)){ // x button 
-    
-  } else if (redController.getRawButton(2)){ // O button 
-    
-  } else if (redController.getRawButton(3)){ // sqaure button intake motor
-    intakeAndFeed = true;
-  } else if (redController.getRawButton(4)){ // triangle button OFF button
+  if (redController.getRawButton(1)){ // x button BackLeg
+    armDesired = 3;
+    override = false;
+  } else if (redController.getRawButton(2)){ // O button Podium
+    armDesired = 2;
+    override = false;
+  } else if (redController.getRawButton(3)){ // sqaure button SubWoofer
+    armDesired = 1;
+    override = false;
+  } else if (redController.getRawButton(4)){ // triangle button Amp
+    armDesired = 0;
+    override = false;
+  } else if (redController.getRawButton(5)){ // L1 button  Shooter Off
     topWheels = false;
     bottomWheels = false;
-    intakeAndFeed = false;
-  } else if (redController.getRawButton(5)){ // L1 button 
-    
   } else if (redController.getRawButton(6)){ //R1 button turns on shooter
     topWheels = true;
     bottomWheels = true;
+  } else if (redController.getRawButton(9)){
+    override = true;
+  } else if (redController.getRawButton(10)){
+    override = false;
   }
   if (blueController.getRawAxis(3) <= 1){
     feedWheels = true;
@@ -292,11 +306,13 @@ public class Robot extends TimedRobot {
   if (intakeAndFeed == true){
     feedMotor.set(intakeAndFeedMotors);
     intakeMotor.set(intakeAndFeedMotors);
+  } else if (reverseIntakeandFeed == true){
+    feedMotor.set(-intakeAndFeedMotors);
+    intakeMotor.set(-intakeAndFeedMotors);
   } else {
     feedMotor.set(0);
     intakeMotor.set(0);
-  }
-
+  } 
 }
 
 
@@ -309,11 +325,12 @@ public class Robot extends TimedRobot {
     backLeftMotor.setIdleMode(IdleMode.kCoast);
     backRightMotor.setIdleMode(IdleMode.kCoast);
     frontRightMotor.setIdleMode(IdleMode.kCoast);
-    intakeMotor.setIdleMode(IdleMode.kCoast);
+
 
     //Sets motors Idle Mode to break
     topShooter.setIdleMode(IdleMode.kCoast);
     bottomShooter.setIdleMode(IdleMode.kCoast);
+    intakeMotor.setIdleMode(IdleMode.kCoast);
     armMotor.setIdleMode(IdleMode.kBrake);
     climbMotor1.setIdleMode(IdleMode.kBrake);
     climbMotor2.setIdleMode(IdleMode.kBrake);
