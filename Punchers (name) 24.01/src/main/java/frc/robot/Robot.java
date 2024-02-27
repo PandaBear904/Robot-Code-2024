@@ -132,7 +132,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Back Left Motor Encoder Distance (rotation*2.23)", backLeftMotorEncoder.getPosition() * distancePerRotation);
     SmartDashboard.putNumber("Top Shooter Motor Encoder", topShooterEncoder.getPosition());
     SmartDashboard.putNumber("Bottom Shooter Motor Encoder", bottomShooterEncoder.getPosition());
-    
+
     // SmartDashboard.putNumber("Arm Motor Encoder", armMotorEncoder.getPosition()); //Might need to add back in if we get encoder.
   }
 
@@ -152,10 +152,10 @@ public class Robot extends TimedRobot {
   // This is to change whether or not in invert the motors
   frontLeftMotor.setInverted(false);
   backLeftMotor.setInverted(false);
-  frontRightMotor.setInverted(true);
-  backRightMotor.setInverted(true);
+  frontRightMotor.setInverted(false);
+  backRightMotor.setInverted(false);
 
-  topShooter.setInverted(false);
+  topShooter.setInverted(true);
   bottomShooter.setInverted(false);
 
   intakeMotor.setInverted(false);
@@ -216,15 +216,9 @@ public class Robot extends TimedRobot {
     intakeAndFeed = true;
   } else if (blueController.getRawButton(4)){ // triangle button  OFF button
     intakeAndFeed = false;
-  } else if (blueController.getRawButton(9)){
-
-  } else if (blueController.getRawButton(10)){
-    climb = true;
-  }
-
-  if (climb == true){
-    climbMotor1.set(-blueController.getRawAxis(1)/2);
-    climbMotor2.set(-blueController.getRawAxis(3)/2);
+  } 
+  if (blueController.getRawAxis(3) <= 1){
+    feedWheels = true;
   }
 
   // reading arm sensor
@@ -278,13 +272,16 @@ public class Robot extends TimedRobot {
   } else if (redController.getRawButton(9)){
     override = true;
   } else if (redController.getRawButton(10)){
-    override = false;
+    climb = true;
   }
-  if (blueController.getRawAxis(3) <= 1){
-    feedWheels = true;
-  }
+
   if (NoteSensor.get()){
     intakeAndFeed = false;
+  }
+
+  if (climb == true){
+    climbMotor1.set(-redController.getRawAxis(1)/2);
+    climbMotor2.set(-redController.getRawAxis(3)/2);
   }
 
 
@@ -340,13 +337,13 @@ public class Robot extends TimedRobot {
   }
 
   public void score(){
-    topWheels = true;
-    bottomWheels = true;
+    topShooter.set(topShooterSpeed);
+    bottomShooter.set(bottomShooterSpeed);
     Timer.delay(1);
-    feedWheels = true;
+    feedMotor.set(feedSpeed);
     Timer.delay(0.75);
-    topWheels = false; 
-    bottomWheels = false;
+    topShooter.set(0);
+    bottomShooter.set(0);
   }
 
 
@@ -369,7 +366,7 @@ public class Robot extends TimedRobot {
   public void Score_Drive_Score(){ // Add not sensor to this
     score();
     Timer.delay(0.25);
-    /*intakeAndFeed = true;
+    /*intakeAndFeed = true; // this won't work need to use .set motors.
     if (NoteSensor.get()){
       intakeAndFeed = false;
     }*/
