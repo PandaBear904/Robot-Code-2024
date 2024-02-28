@@ -91,21 +91,20 @@ public class Robot extends TimedRobot {
   
 
   //Speeds  have all various speeds here
-  public final double topShooterSpeed = 1;
-  public final double bottomShooterSpeed = 1;
-  public final double shooterSpeed = 1;
-  public final double intakeAndFeedMotors = 1;
-  public final double intakeSpeed = 1;
-  public final double feedSpeed = 1;
-  public final double armSpeed = 0.25;
+  public final double topShooterSpeed = 0.5;
+  public final double bottomShooterSpeed = 0.5;
+  public final double shooterSpeed = 0.5;
+  public final double intakeAndFeedMotors = 0.5;
+  public final double intakeSpeed = 0.5;
+  public final double feedSpeed = 0.5;
+  public final double armSpeed = 0; // set to 0.25
 
   public boolean topWheels = false;
   public boolean bottomWheels = false;
   public boolean feedWheels = false;
   public boolean climbMotors = false;
-  public boolean intakeAndFeed = false;
+  public boolean intake = false;
   public boolean override = false;
-  public boolean reverseIntakeandFeed = false;
   public boolean climb = false;
 
   //Auto Stuff
@@ -152,15 +151,15 @@ public class Robot extends TimedRobot {
   // This is to change whether or not in invert the motors
   frontLeftMotor.setInverted(false);
   backLeftMotor.setInverted(false);
-  frontRightMotor.setInverted(false);
-  backRightMotor.setInverted(false);
+  frontRightMotor.setInverted(true);
+  backRightMotor.setInverted(true);
 
   topShooter.setInverted(true);
-  bottomShooter.setInverted(false);
+  bottomShooter.setInverted(true);
 
   intakeMotor.setInverted(false);
   armMotor.setInverted(false);
-  feedMotor.setInverted(false);
+  feedMotor.setInverted(true);
 
   climbMotor1.setInverted(false);
   climbMotor2.setInverted(false);
@@ -208,18 +207,16 @@ public class Robot extends TimedRobot {
     backRightMotor.setIdleMode(IdleMode.kCoast);
   }
 
-  if (blueController.getRawButton(1)){ // x button BackLeg
-
-  } else if (blueController.getRawButton(2)){ // o button Podium
-  reverseIntakeandFeed = true;
+  if (blueController.getRawButton(2)){ // o button reverse
+  //reverseIntakeandFeed = true;
   } else if (blueController.getRawButton(3)){ // square button  intake motor
-    intakeAndFeed = true;
-  } else if (blueController.getRawButton(4)){ // triangle button  OFF button
-    intakeAndFeed = false;
-  } 
-  if (blueController.getRawAxis(3) <= 1){
+    intake = true;
     feedWheels = true;
-  }
+  } else if (blueController.getRawButton(4)){ // triangle button  OFF button
+    intake = false;
+    feedWheels = false;
+  } 
+
 
   // reading arm sensor
   if (AmpLimit.get()){
@@ -257,10 +254,10 @@ public class Robot extends TimedRobot {
   } else if (redController.getRawButton(2)){ // O button Podium
     armDesired = 2;
     override = false;
-  } else if (redController.getRawButton(3)){ // sqaure button SubWoofer
+  }else if (redController.getRawButton(3)){ // sqaure button SubWoofer
     armDesired = 1;
     override = false;
-  } else if (redController.getRawButton(4)){ // triangle button Amp
+  }else if (redController.getRawButton(4)){ // triangle button Amp
     armDesired = 0;
     override = false;
   } else if (redController.getRawButton(5)){ // L1 button  Shooter Off
@@ -274,14 +271,21 @@ public class Robot extends TimedRobot {
   } else if (redController.getRawButton(10)){
     climb = true;
   }
+  if (redController.getRawAxis(3) > 0.1){
+    feedWheels = true;
+  }
+  if (redController.getRawAxis(4) > 0.1){
+    feedWheels = true;
+  }
 
   if (NoteSensor.get()){
-    intakeAndFeed = false;
+    intake = false;
+    feedWheels = false;
   }
 
   if (climb == true){
     climbMotor1.set(-redController.getRawAxis(1)/2);
-    climbMotor2.set(-redController.getRawAxis(3)/2);
+    climbMotor2.set(-redController.getRawAxis(5)/2);
   }
 
 
@@ -300,19 +304,13 @@ public class Robot extends TimedRobot {
   }
   if (feedWheels == true){
     feedMotor.set(feedSpeed);
-  } else {
+  } 
+  if (feedWheels == false){
     feedMotor.set(0);
   }
-  if (intakeAndFeed == true){
-    feedMotor.set(intakeAndFeedMotors);
-    intakeMotor.set(intakeAndFeedMotors);
-  } else if (reverseIntakeandFeed == true){
-    feedMotor.set(-intakeAndFeedMotors);
-    intakeMotor.set(-intakeAndFeedMotors);
-  } else {
-    feedMotor.set(0);
-    intakeMotor.set(0);
-  } 
+  if (intake == true){
+    intakeMotor.set(intakeSpeed);
+  }
 }
 
 
