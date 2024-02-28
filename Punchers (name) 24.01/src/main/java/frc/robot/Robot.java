@@ -91,14 +91,16 @@ public class Robot extends TimedRobot {
   
 
   //Speeds  have all various speeds here
-  public final double topShooterSpeed = 0.5;
-  public final double bottomShooterSpeed = 0.5;
-  public final double shooterSpeed = 0.5;
+  public final double topShooterSpeed = 0.3; // this no work
+  public final double bottomShooterSpeed = 0.3; // this no work
+  public final double shooterSpeed = 1;
   public final double intakeAndFeedMotors = 0.5;
-  public final double intakeSpeed = 0.5;
-  public final double feedSpeed = 0.5;
-  public final double armSpeed = 0; // set to 0.25
+  public final double intakeSpeed = 1;
+  public final double shooterFeedSpeed = 1;
+  public final double feedSpeed = 0.2;
+  public final double armSpeed = 0.15; // set to 0.25
 
+  public boolean shooterFeed = false;
   public boolean topWheels = false;
   public boolean bottomWheels = false;
   public boolean feedWheels = false;
@@ -157,9 +159,9 @@ public class Robot extends TimedRobot {
   topShooter.setInverted(true);
   bottomShooter.setInverted(true);
 
-  intakeMotor.setInverted(false);
+  intakeMotor.setInverted(true);
   armMotor.setInverted(false);
-  feedMotor.setInverted(true);
+  feedMotor.setInverted(false);
 
   climbMotor1.setInverted(false);
   climbMotor2.setInverted(false);
@@ -169,8 +171,8 @@ public class Robot extends TimedRobot {
   backRightMotor.follow(frontRightMotor);
 
   // Shooter Arm state
-  armDesired = 1;
-  armCurrent = 1;
+  //armDesired = 1;
+  //armCurrent = 1;
 
   // Sets up Cammera
   CameraServer.startAutomaticCapture();
@@ -186,7 +188,13 @@ public class Robot extends TimedRobot {
       halfSpeed = true;
     } else if (blueController.getRawButton(6)) { //R1 full speed
     halfSpeed = false;
-  }
+  } else if (blueController.getRawButton(3)){ // square button  intake motor
+    intake = true;
+    feedWheels = true;
+  } else if (blueController.getRawButton(4)){ // triangle button  OFF button
+    intake = false;
+    feedWheels = false;
+  } 
 
   if (halfSpeed) { // if half speed true
     driveTrain.arcadeDrive(-blueController.getRawAxis(1)/2, -blueController.getRawAxis(4)/2);
@@ -207,19 +215,15 @@ public class Robot extends TimedRobot {
     backRightMotor.setIdleMode(IdleMode.kCoast);
   }
 
-  if (blueController.getRawButton(2)){ // o button reverse
+  //if (blueController.getRawButton(2)){ // o button reverse
   //reverseIntakeandFeed = true;
-  } else if (blueController.getRawButton(3)){ // square button  intake motor
-    intake = true;
-    feedWheels = true;
-  } else if (blueController.getRawButton(4)){ // triangle button  OFF button
-    intake = false;
-    feedWheels = false;
-  } 
+  //} else 
+
+
 
 
   // reading arm sensor
-  if (AmpLimit.get()){
+  /*if (AmpLimit.get()){
     armCurrent = 0;
   }
   if (SubWooferLimit.get()){
@@ -230,13 +234,13 @@ public class Robot extends TimedRobot {
   }
   if (BackPostLimit.get()){
     armCurrent = 3;
-  }
+  }*/
 
 
   if (override == true){
     // Sets the arm motor direction
     armMotor.set(Math.pow(-redController.getRawAxis(5), 3));
-  } else {
+  }/* else {
     if (armCurrent - armDesired < 0){
       armMotor.set(-armSpeed);
     } else if (armCurrent - armDesired > 0){
@@ -245,7 +249,7 @@ public class Robot extends TimedRobot {
       armMotor.set(0);
     }
 
-  }
+  }*/
 
   //buttons on red controller
   if (redController.getRawButton(1)){ // x button BackLeg
@@ -263,25 +267,25 @@ public class Robot extends TimedRobot {
   } else if (redController.getRawButton(5)){ // L1 button  Shooter Off
     topWheels = false;
     bottomWheels = false;
+    feedWheels = false;
   } else if (redController.getRawButton(6)){ //R1 button turns on shooter
     topWheels = true;
     bottomWheels = true;
   } else if (redController.getRawButton(9)){
-    override = true;
-  } else if (redController.getRawButton(10)){
     climb = true;
+  } else if (redController.getRawButton(10)){
+    override = true;
   }
   if (redController.getRawAxis(3) > 0.1){
     feedWheels = true;
   }
-  if (redController.getRawAxis(4) > 0.1){
-    feedWheels = true;
-  }
 
-  if (NoteSensor.get()){
+
+
+  /*if (NoteSensor.get()){
     intake = false;
     feedWheels = false;
-  }
+  }*/
 
   if (climb == true){
     climbMotor1.set(-redController.getRawAxis(1)/2);
@@ -304,13 +308,19 @@ public class Robot extends TimedRobot {
   }
   if (feedWheels == true){
     feedMotor.set(feedSpeed);
-  } 
-  if (feedWheels == false){
+  } else {
     feedMotor.set(0);
   }
   if (intake == true){
     intakeMotor.set(intakeSpeed);
+  } else {
+    intakeMotor.set(0);
   }
+  /*if (shooterFeed == true){
+    feedMotor.set(shooterFeedSpeed);
+  } else {
+    feedMotor.set(0);
+  }*/
 }
 
 
