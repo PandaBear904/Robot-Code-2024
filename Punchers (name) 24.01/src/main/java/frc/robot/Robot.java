@@ -273,6 +273,7 @@ public class Robot extends TimedRobot {
     bottomWheels = true;
   } else if (redController.getRawButton(9)){
     climb = true;
+    override = false;
   } else if (redController.getRawButton(10)){
     override = true;
   }
