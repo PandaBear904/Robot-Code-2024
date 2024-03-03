@@ -98,7 +98,7 @@ public class Robot extends TimedRobot {
   public final double feedSpeed = 0.3;
   public final double armSpeed = 0.25; // set to 0.25
 
-  public boolean shooter = false;
+  public boolean shooter = true;
   public boolean shooterFeed = false;
   public boolean topWheels = false;
   public boolean bottomWheels = false;
@@ -110,7 +110,7 @@ public class Robot extends TimedRobot {
 
   //Auto Stuff
   //Distants robot need to move in auto
-  public final double distanceOutStartArea = 40; // Need to test!!!!!!!!!!! 
+  public final double distanceOutStartArea = 100; // Need to test!!!!!!!!!!! 
   // we need to be about 72in
   public final double autoSpeed = 0.5;
 
@@ -199,7 +199,7 @@ public class Robot extends TimedRobot {
   } 
 
   if (halfSpeed) { // if half speed true
-    driveTrain.arcadeDrive(-blueController.getRawAxis(1)/2, -blueController.getRawAxis(4)/2);
+    driveTrain.arcadeDrive(-blueController.getRawAxis(1) * 3/4, -blueController.getRawAxis(4) * 3/4);
   } else {
     driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1), 3), Math.pow(-blueController.getRawAxis(4), 3));
   }
@@ -278,30 +278,29 @@ public class Robot extends TimedRobot {
     override = true;
     climb = false;
   }
-  if (shooter == true){
-    topShooter.set(redController.getRawAxis(3));
-    bottomShooter.set(redController.getRawAxis(3));
-  }
   //Test this when there is time most likly after match 8 or after our last match
-/*  if (shooter == true){
-    if (redController.getRawAxis(3) >= 0.55){
+  if (shooter == true){
+    if (redController.getRawAxis(2) >= 0.1){
       topShooter.set(1);
       bottomShooter.set(1);
-    } else if (redController.getRawAxis(3) <= 0.5){
-      topShooter.set(0.4);
-      bottomShooter.set(0.4);
-    } else if (redController.getRawAxis(3) >= 0){
+    } else if (redController.getRawAxis(3) >= 0.1){
+      topShooter.set(0.1);
+      bottomShooter.set(0.1);
+    } else if (redController.getRawAxis(3) == 0){
       topShooter.set(0);
       bottomShooter.set(0);
-    }
-  }*/
+  }
+}
 
 
 
-  /*if (NoteSensor.get()){
+   if (NoteSensor.get()){
+    Timer.delay(0.05);
     intake = false;
     feedWheels = false;
-  }*/
+  } else if(redController .getRawButton(6)){
+    feedWheels = true;
+  }
 
   if (climb == true){
     climbMotor1.set(redController.getRawAxis(1)/2);
