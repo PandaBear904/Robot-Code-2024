@@ -31,11 +31,12 @@ public class Robot extends TimedRobot {
   private static final String kScore = "Score";
   private static final String kScoreDriveScore = "ScoreDriveScore";
   private static final String kNothing = "Nothing";
+  private static final String k3NoteAuto = "3NoteAuto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   //Autonomous Length in Seconds
-  public final double autonomousLengthSecends = 15;
+  public final double autonomousLengthSeconds = 15;
 
 
   // Sets up controllers
@@ -55,7 +56,7 @@ public class Robot extends TimedRobot {
 
   // Intake Motor
   private final CANSparkMax intakeMotor = new CANSparkMax(5,MotorType.kBrushed);
-  private final CANSparkMax armMotor = new CANSparkMax(6, MotorType.kBrushed);
+  private final CANSparkMax armMotor = new CANSparkMax(6, MotorType.kBrushless);
   // Shooter Motors
   // Shooters
   private final CANSparkMax topShooter = new CANSparkMax(7, MotorType.kBrushless);
@@ -107,6 +108,7 @@ public class Robot extends TimedRobot {
   public boolean intake = false;
   public boolean override = false;
   public boolean climb = false;
+  public boolean rFeed = false;
 
   //Auto Stuff
   //Distants robot need to move in auto
@@ -139,6 +141,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+  // time left in the game
+  SmartDashboard.putNumber("Time (seconds)", Timer.getFPGATimestamp());
   // Set up the options you see for auto on SmartDashboard. Need to add more when we are done with auto code.
   // Note if there is nothing here code will not work
   m_chooser.setDefaultOption("Default - Score_Drive", kScoreDrive);
@@ -148,9 +152,18 @@ public class Robot extends TimedRobot {
   m_chooser.addOption("Score_Drive_Score", kScoreDriveScore);
   m_chooser.addOption("Move", kDrive);
   m_chooser.addOption("Do_Nothing", kNothing);
+  m_chooser.addOption("3_Note_Auto", k3NoteAuto);
   SmartDashboard.putData("Auto choices", m_chooser);
 
 
+  SmartDashboard.putData("Amp_Level", AmpLimit);
+  SmartDashboard.putData("SubWoofer_Level", SubWooferLimit);
+  SmartDashboard.putData("Podium_Level", PodiumLimit);
+  SmartDashboard.putData("BackPost_Level",BackPostLimit );
+  SmartDashboard.putData("Note_Sensor", NoteSensor);
+
+
+  
   // This is to change whether or not in invert the motors
   frontLeftMotor.setInverted(false);
   backLeftMotor.setInverted(false);
@@ -190,13 +203,13 @@ public class Robot extends TimedRobot {
       halfSpeed = true;
     } else if (blueController.getRawButton(6)) { //R1 full speed
     halfSpeed = false;
-  } else if (blueController.getRawButton(3)){ // square button  intake motor
+    } else if (blueController.getRawButton(3)){ // square button  intake motor
     intake = true;
     feedWheels = true;
-  } else if (blueController.getRawButton(4)){ // triangle button  OFF button
+    } else if (blueController.getRawButton(4)){ // triangle button  OFF button
     intake = false;
     feedWheels = false;
-  } 
+    } 
 
   if (halfSpeed) { // if half speed true
     driveTrain.arcadeDrive(-blueController.getRawAxis(1) * 3/4, -blueController.getRawAxis(4) * 3/4);
@@ -268,9 +281,9 @@ public class Robot extends TimedRobot {
     override = false;
   } else if (redController.getRawButton(5)){ // L1 button  Shooter Off
     feedWheels = false;
+    rFeed = false;
   }else if (redController.getRawButton(6)){ //R1 button turns on shooter
-    shooter = true;
-    feedWheels = true;
+    rFeed = true;
   } else if (redController.getRawButton(9)){ // R3 moves climber
     climb = true;
     override  = false;
@@ -278,42 +291,16 @@ public class Robot extends TimedRobot {
     override = true;
     climb = false;
   }
-  //Test this when there is time most likly after match 8 or after our last match
-  if (shooter == true){
-    if (redController.getRawAxis(2) >= 0.1){
-      topShooter.set(1);
-      bottomShooter.set(1);
-    } else if (redController.getRawAxis(3) >= 0.1){
-      topShooter.set(0.1);
-      bottomShooter.set(0.1);
-    } else if (redController.getRawAxis(3) == 0){
-      topShooter.set(0);
-      bottomShooter.set(0);
-  }
-}
-
-
-
-   if (NoteSensor.get()){
-    Timer.delay(0.05);
-    intake = false;
-    feedWheels = false;
-  } else if(redController .getRawButton(6)){
-    feedWheels = true;
-  }
-
-  if (climb == true){
-    climbMotor1.set(redController.getRawAxis(1)/2);
-    climbMotor2.set(-redController.getRawAxis(5)/2);
-  }
-
 
   //put boolean if statements here to turn on and off motors
   // booleans
 
 
   if (feedWheels == true){
+    Timer.delay(0.5);
     feedMotor.set(feedSpeed);
+  } else if (rFeed == true) {
+    feedMotor.set(-feedSpeed);
   } else {
     feedMotor.set(0);
   }
@@ -321,6 +308,30 @@ public class Robot extends TimedRobot {
     intakeMotor.set(intakeSpeed);
   } else {
     intakeMotor.set(0);
+  }
+
+  if (shooter == true){
+    if (redController.getRawAxis(2) >= 0.1){
+      topShooter.set(1);
+      bottomShooter.set(1);
+      feedWheels = true;
+    } else if (redController.getRawAxis(3) >= 0.1){
+      topShooter.set(0.1);
+      bottomShooter.set(0.1);
+      feedWheels = true;
+    } else if (redController.getRawAxis(3) == 0){
+      topShooter.set(0);
+      bottomShooter.set(0);
+  }
+}
+if (NoteSensor.get()){
+      intake = false;
+      feedWheels = false;
+
+  }
+  if (climb == true){
+    climbMotor1.set(redController.getRawAxis(1)/2);
+    climbMotor2.set(-redController.getRawAxis(5)/2);
   }
 }
 
@@ -347,7 +358,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic(){
-
+  driveTrain = new DifferentialDrive(frontLeftMotor::set, frontRightMotor::set);
   }
 
   public void shoot(){
@@ -361,7 +372,7 @@ public class Robot extends TimedRobot {
     bottomShooter.set(0);
   }
 
-
+  
   public void driveDistance(double distance){
     if(distance < 0){
       while ((frontLeftMotorEncoder.getPosition() * distancePerRotation > distance)){
@@ -373,6 +384,17 @@ public class Robot extends TimedRobot {
       }
     }
   }
+  public void driveTimeBack(){
+    while (Timer.getMatchTime() <= 10){
+      driveTrain.arcadeDrive(-0.6, 0);
+    }
+  }
+
+  public void driveTimeForwad(){
+    while (Timer.getMatchTime() <= 10){
+      driveTrain.arcadeDrive(0.6, 0);
+    }
+  }
 
 
 
@@ -382,10 +404,10 @@ public class Robot extends TimedRobot {
   public void Score_Drive_Score(){ // Add note sensor to this
     shoot();
     Timer.delay(0.25);
-    /*intakeAndFeed = true; // this won't work need to use .set motors.
+    intake = true; // this won't work need to use .set motors.
     if (NoteSensor.get()){
-      intakeAndFeed = false;
-    }*/
+      intakeMotor.set(0);
+    }
     driveDistance(distanceOutStartArea);
     Timer.delay(0.25);
     driveDistance(-distanceOutStartArea);
@@ -403,20 +425,12 @@ public class Robot extends TimedRobot {
   }
 
   public void nothing(){
-    Timer.delay(autonomousLengthSecends - Timer.getMatchTime());
+    Timer.delay(autonomousLengthSeconds - Timer.getMatchTime());
   }
  
   public void ScoreDriveT(){
     shoot();
-    frontLeftMotor.set(autoSpeed);
-    frontRightMotor.set(autoSpeed);
-    backLeftMotor.set(autoSpeed);
-    backRightMotor.set(autoSpeed);
-    Timer.delay(5);
-    frontLeftMotor.set(0);
-    frontRightMotor.set(0);
-    backLeftMotor.set(0);
-    backRightMotor.set(0);
+    driveTimeBack();
   }
 
 
@@ -451,23 +465,37 @@ public class Robot extends TimedRobot {
     break;
     case kScoreDriveT:
     ScoreDriveT();
+    break;
+    case k3NoteAuto:
+    shoot();
+    intake = true;
+    driveTimeBack();
+    driveTimeForwad();
+    shoot();
+    //Right now this is two note need to have the robot turn to get a three not
     } 
   }
+
     @Override
   public void disabledPeriodic(){
   }
+
     @Override
   public void disabledInit(){
   }
+
     @Override
   public void testInit(){
   }
+
     @Override
   public void testPeriodic(){
   }
+
     @Override
   public void simulationInit(){
   }
+
     @Override
   public void simulationPeriodic(){
   }
