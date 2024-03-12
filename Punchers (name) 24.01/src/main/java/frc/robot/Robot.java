@@ -97,7 +97,7 @@ public class Robot extends TimedRobot {
   public final double intakeSpeed = 1;
   public final double shooterFeedSpeed = 1;
   public final double feedSpeed = 0.3;
-  public final double armSpeed = 0.25; // set to 0.25
+  public final double armSpeed = 1; // set to 0.25
 
   public boolean shooter = true;
   public boolean shooterFeed = false;
@@ -212,22 +212,54 @@ public class Robot extends TimedRobot {
     } 
 
   if (halfSpeed) { // if half speed true
-    driveTrain.arcadeDrive(-blueController.getRawAxis(1) * 3/4, -blueController.getRawAxis(4) * 3/4);
-  } else {
-    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1), 3), Math.pow(-blueController.getRawAxis(4), 3));
-  }
+    driveTrain.arcadeDrive(-blueController.getRawAxis(1) * 3/4, -blueController.getRawAxis(4) * 3/4);}
+  else if (-blueController.getRawAxis(4)>.09) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.3+.7, 7), Math.pow(-blueController.getRawAxis(4)*.3+.7, 7));}
+  else if (-blueController.getRawAxis(4)<-.09) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.3-.7, 7), Math.pow(-blueController.getRawAxis(4)*.3-.7, 7));}
+  else if (-blueController.getRawAxis(1)>.09) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.3+.7, 7), Math.pow(-blueController.getRawAxis(4)*.3+.7, 7));}
+  else if (-blueController.getRawAxis(1)<-.09) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.3-.7, 7), Math.pow(-blueController.getRawAxis(4)*.3-.7, 7));}
+  else {driveTrain.arcadeDrive(0,0);} 
+
+/* if (halfSpeed) { // if half speed true
+    driveTrain.arcadeDrive(-blueController.getRawAxis(1) * 3/4, -blueController.getRawAxis(4) * 3/4);}
+  else if (-blueController.getRawAxis(4)>0) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.2+.8, 7), Math.pow(-blueController.getRawAxis(4)*.2+.8, 7));}
+  else if (-blueController.getRawAxis(4)<0) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.2-.8, 7), Math.pow(-blueController.getRawAxis(4)*.2-.8, 7));}
+  else if (-blueController.getRawAxis(1)>0) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.3+.7, 7), Math.pow(-blueController.getRawAxis(4)*.3+.7, 7));}
+  else if (-blueController.getRawAxis(1)<0) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.3-.7, 7), Math.pow(-blueController.getRawAxis(4)*.3-.7, 7));}
+  else if (-blueController.getRawAxis(1)==0); {
+    driveTrain.arcadeDrive(0,0);}
+  if (-blueController.getRawAxis(4)==0); {
+    driveTrain.arcadeDrive(0,0);} */
+  
+  /*if (-blueController.getRawAxis(1)==0); {
+    driveTrain.arcadeDrive(0,0);}
+  if (-blueController.getRawAxis(4)==0); {
+    driveTrain.arcadeDrive(0,0);}  
+  if (halfSpeed) { // if half speed true
+    driveTrain.arcadeDrive(-blueController.getRawAxis(1) * 3/4, -blueController.getRawAxis(4) * 3/4);}
+  else if (-blueController.getRawAxis(4)>0) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.2+.8, 7), Math.pow(-blueController.getRawAxis(4)*.2+.8, 7));}
+  else if (-blueController.getRawAxis(4)<0) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.2-.8, 7), Math.pow(-blueController.getRawAxis(4)*.2-.8, 7));}
+  else if (-blueController.getRawAxis(1)>0) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.2+.8, 7), Math.pow(-blueController.getRawAxis(4)*.2+.8, 7));}
+  else if (-blueController.getRawAxis(1)<0) {
+    driveTrain.arcadeDrive(Math.pow(-blueController.getRawAxis(1)*.2-.8, 7), Math.pow(-blueController.getRawAxis(4)*.2-.8, 7));}*/
+  
+
 
   // Set the break mode for drive train
   if (blueController.getRawAxis(2) > 0.1){
-    frontLeftMotor.setIdleMode(IdleMode.kBrake);
-    backLeftMotor.setIdleMode(IdleMode.kBrake);
-    frontRightMotor.setIdleMode(IdleMode.kBrake);
-    backRightMotor.setIdleMode(IdleMode.kBrake);
+    intake = true;
   } else if (blueController.getRawAxis(3) > 0.1){
-    frontLeftMotor.setIdleMode(IdleMode.kCoast);
-    backLeftMotor.setIdleMode(IdleMode.kCoast);
-    frontRightMotor.setIdleMode(IdleMode.kCoast);
-    backRightMotor.setIdleMode(IdleMode.kCoast);
+    intake = false;
   }
 
   //if (blueController.getRawButton(2)){ // o button reverse
@@ -297,7 +329,7 @@ public class Robot extends TimedRobot {
 
 
   if (feedWheels == true){
-    Timer.delay(0.5);
+    Timer.delay(0);
     feedMotor.set(feedSpeed);
   } else if (rFeed == true) {
     feedMotor.set(-feedSpeed);
