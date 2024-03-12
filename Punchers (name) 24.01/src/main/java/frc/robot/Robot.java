@@ -1,4 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
+ // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 // Code for our 2024 robot by Scotty, Logan, and Mr.N
@@ -203,13 +203,7 @@ public class Robot extends TimedRobot {
       halfSpeed = true;
     } else if (blueController.getRawButton(6)) { //R1 full speed
     halfSpeed = false;
-    } else if (blueController.getRawButton(3)){ // square button  intake motor
-    intake = true;
-    feedWheels = true;
-    } else if (blueController.getRawButton(4)){ // triangle button  OFF button
-    intake = false;
-    feedWheels = false;
-    } 
+    }
 
   if (halfSpeed) { // if half speed true
     driveTrain.arcadeDrive(-blueController.getRawAxis(1) * 3/4, -blueController.getRawAxis(4) * 3/4);}
@@ -258,8 +252,10 @@ public class Robot extends TimedRobot {
   // Set the break mode for drive train
   if (blueController.getRawAxis(2) > 0.1){
     intake = true;
+    feedWheels = true;
   } else if (blueController.getRawAxis(3) > 0.1){
     intake = false;
+    feedWheels = false;
   }
 
   //if (blueController.getRawButton(2)){ // o button reverse
@@ -329,7 +325,6 @@ public class Robot extends TimedRobot {
 
 
   if (feedWheels == true){
-    Timer.delay(0);
     feedMotor.set(feedSpeed);
   } else if (rFeed == true) {
     feedMotor.set(-feedSpeed);
@@ -390,7 +385,6 @@ if (NoteSensor.get()){
 
   @Override
   public void autonomousPeriodic(){
-  driveTrain = new DifferentialDrive(frontLeftMotor::set, frontRightMotor::set);
   }
 
   public void shoot(){
@@ -433,15 +427,13 @@ if (NoteSensor.get()){
   public void Score(){
     shoot();
   }
-  public void Score_Drive_Score(){ // Add note sensor to this
+  public void Score_Drive_Score(){
     shoot();
-    Timer.delay(0.25);
     intake = true; // this won't work need to use .set motors.
     if (NoteSensor.get()){
       intakeMotor.set(0);
     }
     driveDistance(distanceOutStartArea);
-    Timer.delay(0.25);
     driveDistance(-distanceOutStartArea);
     shoot();
   }
@@ -452,17 +444,16 @@ if (NoteSensor.get()){
   
   public void ScoreDrive(){
     shoot();
-    Timer.delay(0.25);
     driveDistance(distanceOutStartArea);
   }
 
   public void nothing(){
-    Timer.delay(autonomousLengthSeconds - Timer.getMatchTime());
+
   }
  
   public void ScoreDriveT(){
     shoot();
-    driveTimeBack();
+    driveTimeForwad();
   }
 
 
