@@ -97,7 +97,7 @@ public class Robot extends TimedRobot {
   public final double intakeAndFeedMotors = 0.5;
   public final double intakeSpeed = 1;
   public final double feedSpeed = 0.3;
-  public final double armSpeed = 0.25; // set to 0.25
+  public final double armSpeed = 0.3; // might need to make faster
 
   public boolean shooter = true;
   public boolean shooterFeed = false;
