@@ -73,6 +73,7 @@ public class Robot extends TimedRobot {
   private final RelativeEncoder backRightMotorEncoder = frontLeftMotor.getEncoder(); // Back Right Motor Controller
   private final RelativeEncoder topShooterEncoder = topShooter.getEncoder(); // Top Shooter 
   private final RelativeEncoder bottomShooterEncoder = bottomShooter.getEncoder(); // Bottom Shooter
+  private final RelativeEncoder armMotorEncoder = armMotor.getEncoder();
 
   // Half speed
   public boolean halfSpeed = false;
@@ -96,7 +97,7 @@ public class Robot extends TimedRobot {
   public final double intakeAndFeedMotors = 0.5;
   public final double intakeSpeed = 1;
   public final double feedSpeed = 0.3;
-  public final double armSpeed = 1; // set to 0.25
+  public final double armSpeed = 0.25; // set to 0.25
 
   public boolean shooter = true;
   public boolean shooterFeed = false;
@@ -112,12 +113,13 @@ public class Robot extends TimedRobot {
   //Auto Stuff
   //Distants robot need to move in auto
   public final double distanceOutStartArea = 100; // Need to test!!!!!!!!!!! 
-  public final double distanceOutStartAreaShort = 50;
+  public final double distanceOutStartAreaShort = 20;
   public final double distanceOutStartAreaLong = 150;
   // we need to be about 72in
   public final double autoSpeed = 0.5;
 
   public final double distancePerRotation = 2.23;
+  public final double ampLevel = 137;
 
   /* public Robot(){ // Do we need?
 
@@ -136,8 +138,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Back Left Motor Encoder Distance (rotation*2.23)", backLeftMotorEncoder.getPosition() * distancePerRotation);
     SmartDashboard.putNumber("Top Shooter Motor Encoder", topShooterEncoder.getPosition());
     SmartDashboard.putNumber("Bottom Shooter Motor Encoder", bottomShooterEncoder.getPosition());
-
-    // SmartDashboard.putNumber("Arm Motor Encoder", armMotorEncoder.getPosition()); //Might need to add back in if we get encoder.
+    SmartDashboard.putNumber("Arm Motor Encoder", armMotorEncoder.getPosition()); //Might need to add back in if we get encoder.
   }
 
   @Override
@@ -186,8 +187,8 @@ public class Robot extends TimedRobot {
   backRightMotor.follow(frontRightMotor);
 
   // Shooter Arm state
-  //armDesired = 1;
-  //armCurrent = 1;
+  armDesired = 3;
+  armCurrent = 3;
 
   // Sets up Cammera
   CameraServer.startAutomaticCapture();
@@ -260,46 +261,44 @@ public class Robot extends TimedRobot {
   }
 
   // reading arm sensor
-  /*if (AmpLimit.get()){
-    armCurrent = 0;
-  }
-  if (SubWooferLimit.get()){
-    armCurrent = 1;
-  }
-  if (PodiumLimit.get()){
+  if (armMotorEncoder.getPosition() <= 0){
     armCurrent = 2;
   }
-  if (BackPostLimit.get()){
+  if (armMotorEncoder.getPosition() >= 137){
+    armCurrent = 1;
+  }
+  if (armMotorEncoder.getPosition() <= -65){
     armCurrent = 3;
-  }*/
+  } 
 
 
   if (override == true){
     // Sets the arm motor direction
     armMotor.set(Math.pow(-redController.getRawAxis(5), 3));
-  }/* else {
+  } else {
     if (armCurrent - armDesired < 0){
       armMotor.set(-armSpeed);
     } else if (armCurrent - armDesired > 0){
       armMotor.set(armSpeed);
+    } else if (armDesired == 2){
+      if (armCurrent - armDesired < 0){
+      armMotor.set(armSpeed);}
     } else if (armCurrent - armDesired == 0){
       armMotor.set(0);
-    }
-
-  }*/
+  }
+}
 
   //buttons on red controller
-  if (redController.getRawButton(1)){ // x button BackLeg
-    armDesired = 3;
+  if(redController.getRawButton(1)){
     override = false;
-  } else if (redController.getRawButton(2)){ // O button Podium
-    armDesired = 2;
-    override = false;
-  }else if (redController.getRawButton(3)){ // sqaure button SubWoofer
+  } else if(redController.getRawButton(2)){
     armDesired = 1;
     override = false;
+  }else if (redController.getRawButton(3)){ // sqaure button Speaker
+    armDesired = 3;
+    override = false;
   }else if (redController.getRawButton(4)){ // triangle button Amp
-    armDesired = 0;
+    armDesired = 2;
     override = false;
   } else if (redController.getRawButton(5)){ // L1 button  Shooter Off
     feedWheels = false;
@@ -393,11 +392,11 @@ if (NoteSensor.get()){
   public void driveDistance(double distance){
     if(distance < 0){
       while ((frontLeftMotorEncoder.getPosition() * distancePerRotation > distance)){
-        driveTrain.arcadeDrive(-0.6, 0);
+        driveTrain.arcadeDrive(-0.5, 0);
     }
     } else {
       while ((frontLeftMotorEncoder.getPosition() * distancePerRotation < distance)){
-        driveTrain.arcadeDrive(0.6, 0);
+        driveTrain.arcadeDrive(0.5, 0);
       }
     }
   }
@@ -411,15 +410,21 @@ if (NoteSensor.get()){
 
   public void Score_Drive_Score(){
     shoot();
-    intakeMotor.set(1); // this won't work need to use .set motors.
+    intakeMotor.set(0.5); // this won't work need to use .set motors.
     feedMotor.set(0.3);
     driveDistance(distanceOutStartArea);
-    /*if (NoteSensor.get()){
-      intakeMotor.set(0);
-      feedMotor.set(0);
+    if (NoteSensor.get()){
+      intake = false;
+      feedWheels = false;
     }
-    driveDistance(-distanceOutStartArea);*/
+    Timer.delay(0.005);
+    feedMotor.set(0);
+    intakeMotor.set(0);
+    driveDistance(-distanceOutStartAreaShort);
     shoot();
+    intakeMotor.set(0);
+    feedMotor.set(0);
+    Timer.delay(autonomousLengthSeconds - Timer.getMatchTime());
   }
 
   public void Drive(){
