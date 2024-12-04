@@ -1,6 +1,6 @@
 {
   "imu": {
-    "type": "pigeon2",
+    "type": "adis16470",
     "id": 0,
     "canbus": "canivore"
   },
