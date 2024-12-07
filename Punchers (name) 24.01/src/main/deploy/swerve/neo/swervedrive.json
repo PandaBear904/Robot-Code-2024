@@ -2,7 +2,7 @@
   "imu": {
     "type": "adis16470",
     "id": 0,
-    "canbus": "canivore"
+    "canbus": "null"
   },
   "invertedIMU": false,
   "modules": [
